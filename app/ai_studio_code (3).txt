@@ -1,0 +1,32 @@
+name: Tiv Taam Grocery Bot
+on:
+  workflow_dispatch:
+
+jobs:
+  fill-basket:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: |
+          npm install @supabase/supabase-js playwright
+          npx playwright install chromium
+
+      - name: Run Robot
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          TIVTAAM_USER: ${{ secrets.TIVTAAM_USER }}
+          TIVTAAM_PASS: ${{ secrets.TIVTAAM_PASS }}
+        run: node robot_script.js
+
+      - name: Upload Screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: robot-screenshots
+          path: login_check.png
